@@ -1,11 +1,12 @@
 import subprocess
 from pathlib import Path
 
-from caelestia.utils.paths import c_state_dir, config_dir, templates_dir
+from caelestia.utils.paths import c_state_dir, config_dir, templates_dir, wallpaper_link_path
 
 
 def gen_conf(colours: dict[str, str]) -> str:
     conf = ""
+    conf += f"$image = {str(wallpaper_link_path)}"
     for name, colour in colours.items():
         conf += f"${name} = {colour}\n"
     return conf
@@ -24,6 +25,8 @@ def gen_replace(colours: dict[str, str], template: Path, hash: bool = False) -> 
         template = template.replace(f"{{{{ ${name} }}}}", f"#{colour}" if hash else colour)
     return template
 
+def replace_wall(template: str) -> str:
+    return template.replace(f"{{{{ image }}}}", str(wallpaper_link_path))
 
 def c2s(c: str, *i: list[int]) -> str:
     """Hex to ANSI sequence (e.g. ffffff, 11 -> \x1b]11;rgb:ff/ff/ff\x1b\\)"""
@@ -87,10 +90,27 @@ def apply_terms(sequences: str) -> None:
             except PermissionError:
                 pass
 
+def apply_kitty(colours: dict[str, str]) -> None:
+    template = gen_replace(colours, templates_dir / "kitty-colors.conf", hash=True)
+    write_file(config_dir / "kitty/themes/quickshell.conf", template)
+
+    subprocess.run(["kitty", "+kitten", "themes", "--reload-in=all", "Quickshell"])
 
 def apply_hypr(conf: str) -> None:
     write_file(config_dir / "hypr/scheme/current.conf", conf)
 
+def apply_hyprlock(colours: dict[str, str]) -> None:
+    template = gen_replace(colours, templates_dir / "hyprlock.conf", hash=False)
+    template = replace_wall(template)
+    write_file(config_dir / "hypr/hyprlock.conf", template)
+
+def apply_rofi(colours: dict[str, str]) -> None:
+    template = gen_replace(colours, templates_dir / "qs-rofi.rasi", hash=True)
+    write_file(config_dir / "rofi/matugen/matugen-rofi.rasi", template)
+
+def apply_nvim(colours: dict[str, str]) -> None:
+    template = gen_replace(colours, templates_dir / "qs-nvim.lua", hash=True)
+    write_file(config_dir / "nvim/colors/qs-nvim.lua", template)
 
 def apply_discord(scss: str) -> None:
     import tempfile
@@ -143,10 +163,14 @@ def apply_qt(colours: dict[str, str], mode: str) -> None:
 
 
 def apply_colours(colours: dict[str, str], mode: str) -> None:
-    apply_terms(gen_sequences(colours))
+    #apply_terms(gen_sequences(colours))
+    apply_kitty(colours)
     apply_hypr(gen_conf(colours))
-    apply_discord(gen_scss(colours))
-    apply_spicetify(colours, mode)
+    apply_hyprlock(colours)
+    apply_rofi(colours)
+    apply_nvim(colours)
+    #apply_discord(gen_scss(colours))
+    #apply_spicetify(colours, mode)
     apply_fuzzel(colours)
     apply_btop(colours)
     apply_gtk(colours, mode)
