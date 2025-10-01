@@ -57,8 +57,10 @@ def gen_replace_dynamic(colours: dict[str, str], template: Path) -> str:
 
     return template_filled
 
+
 def replace_wall(template: str) -> str:
     return template.replace(f"{{{{ image }}}}", str(wallpaper_link_path))
+
 
 def c2s(c: str, *i: list[int]) -> str:
     """Hex to ANSI sequence (e.g. ffffff, 11 -> \x1b]11;rgb:ff/ff/ff\x1b\\)"""
@@ -123,28 +125,34 @@ def apply_terms(sequences: str) -> None:
             except PermissionError:
                 pass
 
+
 def apply_kitty(colours: dict[str, str]) -> None:
     template = gen_replace(colours, templates_dir / "kitty-colors.conf", hash=True)
     write_file(config_dir / "kitty/themes/quickshell.conf", template)
 
     subprocess.run(["kitty", "+kitten", "themes", "--reload-in=all", "Quickshell"])
 
+
 @log_exception
 def apply_hypr(conf: str) -> None:
     write_file(config_dir / "hypr/scheme/current.conf", conf)
+
 
 def apply_hyprlock(colours: dict[str, str]) -> None:
     template = gen_replace(colours, templates_dir / "hyprlock.conf", hash=False)
     template = replace_wall(template)
     write_file(config_dir / "hypr/hyprlock.conf", template)
 
+
 def apply_rofi(colours: dict[str, str]) -> None:
     template = gen_replace(colours, templates_dir / "qs-rofi.rasi", hash=True)
     write_file(config_dir / "rofi/matugen/matugen-rofi.rasi", template)
 
+
 def apply_nvim(colours: dict[str, str]) -> None:
     template = gen_replace(colours, templates_dir / "qs-nvim.lua", hash=True)
     write_file(config_dir / "nvim/colors/qs-nvim.lua", template)
+
 
 @log_exception
 def apply_discord(scss: str) -> None:
@@ -264,28 +272,28 @@ def apply_colours(colours: dict[str, str], mode: str) -> None:
     def check(key: str) -> bool:
         return cfg[key] if key in cfg else True
 
-    if check("enableTerm"):
-        apply_terms(gen_sequences(colours))
+    # if check("enableTerm"):
+    #   apply_terms(gen_sequences(colours))
     if check("enableHypr"):
         apply_hypr(gen_conf(colours))
-    if check("enableDiscord"):
-        apply_discord(gen_scss(colours))
-    if check("enableSpicetify"):
-        apply_spicetify(colours, mode)
+    # if check("enableDiscord"):
+    #   apply_discord(gen_scss(colours))
+    # if check("enableSpicetify"):
+    #   apply_spicetify(colours, mode)
     if check("enableFuzzel"):
         apply_fuzzel(colours)
     if check("enableBtop"):
         apply_btop(colours)
-    if check("enableNvtop"):
-        apply_nvtop(colours)
-    if check("enableHtop"):
-        apply_htop(colours)
+    # if check("enableNvtop"):
+    #   apply_nvtop(colours)
+    # if check("enableHtop"):
+    #   apply_htop(colours)
     if check("enableGtk"):
         apply_gtk(colours, mode)
     if check("enableQt"):
         apply_qt(colours, mode)
-    if check("enableWarp"):
-        apply_warp(colours, mode)
+    # if check("enableWarp"):
+    #   apply_warp(colours, mode)
     if check("enableCava"):
         apply_cava(colours)
     apply_kitty(colours)
