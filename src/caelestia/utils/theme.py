@@ -6,7 +6,7 @@ from caelestia.utils.paths import c_state_dir, config_dir, templates_dir, wallpa
 
 def gen_conf(colours: dict[str, str]) -> str:
     conf = ""
-    conf += f"$image = {str(wallpaper_link_path)}"
+    conf += f"$image = {str(wallpaper_link_path)}\n"
     for name, colour in colours.items():
         conf += f"${name} = {colour}\n"
     return conf
