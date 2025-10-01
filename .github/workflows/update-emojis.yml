@@ -3,9 +3,9 @@
 name: Update emojis
 
 on:
-    push:
-
     workflow_dispatch:
+    schedule:
+        - cron: "0 0 * * 0"
 
 jobs:
     update:
@@ -28,11 +28,11 @@ jobs:
                   pip install .
 
             - name: Fetch emojis
-              run: ./run.sh emoji -f
+              run: ./bin/caelestia emoji -f
 
             - name: Check for changes
               id: check
-              run: echo modified=$(test -n "$(git status --porcelain)" && echo 'true' || echo 'false') >> $GITHUB_OUTPUT
+              run: echo modified=$(git diff --exit-code src/caelestia/data/emojis.txt &>/dev/null && echo 'false' || echo 'true') >> $GITHUB_OUTPUT
 
             - name: Commit and push changes
               if: steps.check.outputs.modified == 'true'

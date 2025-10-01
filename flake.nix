@@ -4,15 +4,9 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
 
-    app2unit = {
-      url = "github:soramanew/app2unit";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     caelestia-shell = {
       url = "github:caelestia-dots/shell";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.app2unit.follows = "app2unit";
       inputs.caelestia-cli.follows = "";
     };
   };
@@ -32,20 +26,15 @@
     packages = forAllSystems (pkgs: rec {
       caelestia-cli = pkgs.callPackage ./default.nix {
         rev = self.rev or self.dirtyRev;
-        app2unit = inputs.app2unit.packages.${pkgs.system}.default;
         caelestia-shell = inputs.caelestia-shell.packages.${pkgs.system}.default;
       };
+      with-shell = caelestia-cli.override {withShell = true;};
       default = caelestia-cli;
     });
 
     devShells = forAllSystems (pkgs: {
       default = pkgs.mkShellNoCC {
-        inputsFrom = [self.packages.${pkgs.system}.caelestia-cli];
-        packages = [
-          (pkgs.writeShellScriptBin "caelestia" ''
-            cd src && python -m caelestia "$@"
-          '')
-        ];
+        packages = [self.packages.${pkgs.system}.with-shell];
       };
     });
   };

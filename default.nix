@@ -12,13 +12,13 @@
   dart-sass,
   grim,
   fuzzel,
-  wl-screenrec,
+  gpu-screen-recorder,
   dconf,
   killall,
   caelestia-shell,
   withShell ? false,
   discordBin ? "discord",
-  qtctStyle ? "Fusion",
+  qtctStyle ? "Darkly",
 }:
 python3.pkgs.buildPythonApplication {
   pname = "caelestia-cli";
@@ -50,7 +50,7 @@ python3.pkgs.buildPythonApplication {
       dart-sass
       grim
       fuzzel
-      wl-screenrec
+      gpu-screen-recorder
       dconf
       killall
     ]
@@ -70,9 +70,9 @@ python3.pkgs.buildPythonApplication {
     	--replace-fail 'discord' ${discordBin} \
       --replace-fail 'todoist' 'todoist.desktop'
 
-    # Use config style instead of fusion
+    # Use config style instead of darkly
     substituteInPlace src/caelestia/data/templates/qtct.conf \
-    	--replace-fail 'Fusion' '${qtctStyle}'
+    	--replace-fail 'Darkly' '${qtctStyle}'
   '';
 
   postInstall = "installShellCompletion completions/caelestia.fish";

@@ -1,6 +1,6 @@
 import argparse
 
-from caelestia.subcommands import clipboard, emoji, pip, record, scheme, screenshot, shell, toggle, wallpaper
+from caelestia.subcommands import clipboard, emoji, record, resizer, scheme, screenshot, shell, toggle, wallpaper
 from caelestia.utils.paths import wallpapers_dir
 from caelestia.utils.scheme import get_scheme_names, scheme_variants
 from caelestia.utils.wallpaper import get_wallpaper
@@ -22,14 +22,13 @@ def parse_args() -> (argparse.ArgumentParser, argparse.Namespace):
     shell_parser.add_argument("-d", "--daemon", action="store_true", help="start the shell detached")
     shell_parser.add_argument("-s", "--show", action="store_true", help="print all shell IPC commands")
     shell_parser.add_argument("-l", "--log", action="store_true", help="print the shell log")
+    shell_parser.add_argument("-k", "--kill", action="store_true", help="kill the shell")
     shell_parser.add_argument("--log-rules", metavar="RULES", help="log rules to apply")
 
     # Create parser for toggle opts
     toggle_parser = command_parser.add_parser("toggle", help="toggle a special workspace")
     toggle_parser.set_defaults(cls=toggle.Command)
-    toggle_parser.add_argument(
-        "workspace", choices=["communication", "music", "sysmon", "specialws", "todo"], help="the workspace to toggle"
-    )
+    toggle_parser.add_argument("workspace", help="the workspace to toggle")
 
     # Create parser for scheme opts
     scheme_parser = command_parser.add_parser("scheme", help="manage the colour scheme")
@@ -71,6 +70,7 @@ def parse_args() -> (argparse.ArgumentParser, argparse.Namespace):
     record_parser.set_defaults(cls=record.Command)
     record_parser.add_argument("-r", "--region", nargs="?", const="slurp", help="record a region")
     record_parser.add_argument("-s", "--sound", action="store_true", help="record audio")
+    record_parser.add_argument("-p", "--pause", action="store_true", help="pause/resume the recording")
 
     # Create parser for clipboard opts
     clipboard_parser = command_parser.add_parser("clipboard", help="open clipboard history")
@@ -107,9 +107,24 @@ def parse_args() -> (argparse.ArgumentParser, argparse.Namespace):
         help="do not automatically change the scheme mode based on wallpaper colour",
     )
 
-    # Create parser for pip opts
-    pip_parser = command_parser.add_parser("pip", help="picture in picture utilities")
-    pip_parser.set_defaults(cls=pip.Command)
-    pip_parser.add_argument("-d", "--daemon", action="store_true", help="start the daemon")
+    # Create parser for resizer opts
+    resizer_parser = command_parser.add_parser("resizer", help="window resizer daemon")
+    resizer_parser.set_defaults(cls=resizer.Command)
+    resizer_parser.add_argument("-d", "--daemon", action="store_true", help="start the resizer daemon")
+    resizer_parser.add_argument(
+        "pattern",
+        nargs="?",
+        help="pattern to match against windows ('active' for current window only, 'pip' for quick pip mode)",
+    )
+    resizer_parser.add_argument(
+        "match_type",
+        nargs="?",
+        metavar="match_type",
+        choices=["titleContains", "titleExact", "titleRegex", "initialTitle"],
+        help="type of pattern matching (titleContains,titleExact,titleRegex,initialTitle)",
+    )
+    resizer_parser.add_argument("width", nargs="?", help="width to resize to")
+    resizer_parser.add_argument("height", nargs="?", help="height to resize to")
+    resizer_parser.add_argument("actions", nargs="?", help="comma-separated actions to apply (float,center,pip)")
 
     return parser, parser.parse_args()

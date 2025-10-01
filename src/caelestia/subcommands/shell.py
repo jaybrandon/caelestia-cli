@@ -17,6 +17,9 @@ class Command:
         elif self.args.log:
             # Print the log
             self.print_log()
+        elif self.args.kill:
+            # Kill the shell
+            self.shell("kill")
         elif self.args.message:
             # Send a message
             self.message(*self.args.message)
@@ -44,7 +47,10 @@ class Command:
         print(self.shell("ipc", "show"), end="")
 
     def print_log(self) -> None:
-        log = self.shell("log", "-r", self.args.log_rules)
+        if self.args.log_rules:
+            log = self.shell("log", "-r", self.args.log_rules)
+        else:
+            log = self.shell("log")
         # FIXME: remove when logging rules are added/warning is removed
         for line in log.splitlines():
             if self.filter_log(line):
